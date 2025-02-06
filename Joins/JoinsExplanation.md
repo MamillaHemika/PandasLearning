@@ -53,9 +53,9 @@ print("\\nDataFrame 2:\\n", df2)
 
 DataFrame 1:
 
-B
 
-A
+   B
+A 
 
 1 one
 
@@ -67,7 +67,7 @@ A
 
 DataFrame 2:
 
-C
+     C
 
 A
 
@@ -89,7 +89,7 @@ print("\\nInner Join:\\n", inner_join)
 
 Inner Join:
 
-B C
+    B   C
 
 A
 
@@ -109,7 +109,7 @@ print("\\nOuter Join:\\n", outer_join)
 
 Outer Join:
 
-B C
+   B   C
 
 A
 
@@ -135,7 +135,7 @@ print("\\nLeft Join:\\n", left_join)
 
 Left Join:
 
-B C
+   B   C
 
 A
 
@@ -159,7 +159,7 @@ print("\\nRight Join:\\n", right_join)
 
 Right Join:
 
-B C
+   B   C
 
 A
 
