@@ -198,8 +198,7 @@ Let's clarify the differences more explicitly and provide scenarios where the di
 **Summary of Differences**
 
 1. **Key Specification**:
-    - **join**: Primarily used to join DataFrames on their indices. It doe
-    - s not require explicit key specification when joining on indices.
+    - **join**: Primarily used to join DataFrames on their indices. It does not require explicit key specification when joining on indices.
     - **merge**: Requires you to specify the columns (or indices) that you want to join on, allowing you to merge based on multiple keys or even differing column names.
     - **Output Structure**:
     - **join**: Usually simpler and focused on index alignment.
@@ -207,86 +206,167 @@ Let's clarify the differences more explicitly and provide scenarios where the di
     - **Different Outputs Example**
     - To illustrate the difference more clearly, let's set up an example where merge can show its benefits by working on columns rather than indices.
     - **Sample DataFrames**
-    - import pandas as pd
-    - \# Create first DataFrame df1 with a different structure
-    - data1 = {
-    - 'ID': \[1, 2, 3, 4\],
-    - 'Value': \['A', 'B', 'C', 'D'\]
-    - }
-    - df1 = pd.DataFrame(data1)
-    - \# Create second DataFrame df2 with different structure (different 'ID's)
-    - data2 = {
-    - 'ID': \[3, 4, 5\],
-    - 'Description': \['Desc3', 'Desc4', 'Desc5'\]
-    - }
-    - df2 = pd.DataFrame(data2)
-    - print("DataFrame 1:\\n", df1)
-    - print("\\nDataFrame 2:\\n", df2)
-    - **Output:**
-    - DataFrame 1:
-    - ID Value
-    - 0 1 A
-    - 1 2 B
-    - 2 3 C
-    - 3 4 D
-    - DataFrame 2:
-    - ID Description
-    - 0 3 Desc3
-    - 1 4 Desc4
-    - 2 5 Desc5
-    - **Using merge**
-    - Merge both DataFrames on the ID column:
-    - merged_inner = pd.merge(df1, df2, on='ID', how='inner')
-    - print("\\nInner Merge using merge:\\n", merged_inner)
-    - merged_outer = pd.merge(df1, df2, on='ID', how='outer')
-    - print("\\nOuter Merge using merge:\\n", merged_outer)
-    - **Inner Merge Output:**
-    - Inner Merge using merge:
-    - ID Value Description
-    - 0 3 C Desc3
-    - 1 4 D Desc4
-    - **Explanation**: The inner merge returns only the matching rows for IDs 3 and 4 from both DataFrames.
-    - **Outer Merge Output:**
-    - Outer Merge using merge:
-    - ID Value Description
-    - 0 1 A NaN
-    - 1 2 B NaN
-    - 2 3 C Desc3
-    - 3 4 D Desc4
-    - 4 5 NaN Desc5
-    - **Explanation**: The outer merge includes all IDs from both DataFrames. IDs 1 and 2 from df1 have NaN in the Description column since there are no matching entries in df2. Similarly, ID 5 appears with NaN in the Value column because it does not exist in df1.
-    - **Using join**
-    - Suppose we want to do the same operation using join, we need to set indices:
-    - \# Set 'ID' as the index for both DataFrames
-    - df1.set_index('ID', inplace=True)
-    - df2.set_index('ID', inplace=True)
-    - \# Perform joins on the index
-    - inner_join = df1.join(df2, how='inner')
-    - print("\\nInner Join using join:\\n", inner_join)
-    - outer_join = df1.join(df2, how='outer')
-    - print("\\nOuter Join using join:\\n", outer_join)
-    - **Inner Join Output:**
-    - Inner Join using join:
-    - Value Description
-    - ID
-    - 3 C Desc3
-    - 4 D Desc4
-    - **Explanation**: The output is similar to the inner merge since we joined on matching indices (IDs 3 and 4).
-    - **Outer Join Output:**
-    - Outer Join using join:
-    - Value Description
-    - ID
-    - 1 A NaN
-    - 2 B NaN
-    - 3 C Desc3
-    - 4 D Desc4
-    - 5 NaN Desc5
-    - **Explanation**: Again, the output is similar to the outer merge; it includes all IDs with NaN values for missing matches.
-    - **Key Differences in Complex Scenarios**
-    - **Different Key Columns**: If the columns you want to join on do not share the same name, you must use merge, where you can specify left_on and right_on parameters.
-    - **Multiple Columns**: When joining on multiple keys, only merge allows you to specify the multiple columns easily.
-    - **Conclusion**
-    - While both join and merge may produce similar outputs in specific examples, they have distinct purposes and advantages:
-    - Use **join** when dealing with index-based joining; it's simpler and more straightforward.
-    - Use **merge** when you need to join on columns, especially when the structures are different or when requiring multiple conditions/relationships for merging.
-    - In practice, **most of the time, you'll prefer merge for its versatility** unless you're specifically working with indices in a straightforward manner.
+
+import pandas as pd
+
+\# Create first DataFrame df1 with a different structure
+
+data1 = {
+
+'ID': \[1, 2, 3, 4\],
+
+'Value': \['A', 'B', 'C', 'D'\]
+
+}
+
+df1 = pd.DataFrame(data1)
+
+\# Create second DataFrame df2 with different structure (different 'ID's)
+
+data2 = {
+
+'ID': \[3, 4, 5\],
+
+'Description': \['Desc3', 'Desc4', 'Desc5'\]
+
+}
+
+df2 = pd.DataFrame(data2)
+
+print("DataFrame 1:\\n", df1)
+
+print("\\nDataFrame 2:\\n", df2)
+
+**Output:**
+
+DataFrame 1:
+
+ID Value
+
+0 1 A
+
+1 2 B
+
+2 3 C
+
+3 4 D
+
+DataFrame 2:
+
+ID Description
+
+0 3 Desc3
+
+1 4 Desc4
+
+2 5 Desc5
+
+**Using merge**
+
+Merge both DataFrames on the ID column:
+
+merged_inner = pd.merge(df1, df2, on='ID', how='inner')
+
+print("\\nInner Merge using merge:\\n", merged_inner)
+
+merged_outer = pd.merge(df1, df2, on='ID', how='outer')
+
+print("\\nOuter Merge using merge:\\n", merged_outer)
+
+**Inner Merge Output:**
+
+Inner Merge using merge:
+
+ID Value Description
+
+0 3 C Desc3
+
+1 4 D Desc4
+
+- **Explanation**: The inner merge returns only the matching rows for IDs 3 and 4 from both DataFrames.
+
+**Outer Merge Output:**
+
+Outer Merge using merge:
+
+ID Value Description
+
+0 1 A NaN
+
+1 2 B NaN
+
+2 3 C Desc3
+
+3 4 D Desc4
+
+4 5 NaN Desc5
+
+- **Explanation**: The outer merge includes all IDs from both DataFrames. IDs 1 and 2 from df1 have NaN in the Description column since there are no matching entries in df2. Similarly, ID 5 appears with NaN in the Value column because it does not exist in df1.
+
+**Using join**
+
+Suppose we want to do the same operation using join, we need to set indices:
+
+\# Set 'ID' as the index for both DataFrames
+
+df1.set_index('ID', inplace=True)
+
+df2.set_index('ID', inplace=True)
+
+\# Perform joins on the index
+
+inner_join = df1.join(df2, how='inner')
+
+print("\\nInner Join using join:\\n", inner_join)
+
+outer_join = df1.join(df2, how='outer')
+
+print("\\nOuter Join using join:\\n", outer_join)
+
+**Inner Join Output:**
+
+Inner Join using join:
+
+Value Description
+
+ID
+
+3 C Desc3
+
+4 D Desc4
+
+- **Explanation**: The output is similar to the inner merge since we joined on matching indices (IDs 3 and 4).
+
+**Outer Join Output:**
+
+Outer Join using join:
+
+Value Description ->Column names for other except the first
+
+ID
+
+1 A NaN
+
+2 B NaN
+
+3 C Desc3
+
+4 D Desc4
+
+5 NaN Desc5
+
+- **Explanation**: Again, the output is similar to the outer merge; it includes all IDs with NaN values for missing matches.
+
+**Key Differences in Complex Scenarios**
+
+- **Different Key Columns**: If the columns you want to join on do not share the same name, you must use merge, where you can specify left_on and right_on parameters.
+- **Multiple Columns**: When joining on multiple keys, only merge allows you to specify the multiple columns easily.
+
+**Conclusion**
+
+While both join and merge may produce similar outputs in specific examples, they have distinct purposes and advantages:
+
+- Use **join** when dealing with index-based joining; it's simpler and more straightforward.
+- Use **merge** when you need to join on columns, especially when the structures are different or when requiring multiple conditions/relationships for merging.
+
+In practice, **most of the time, you'll prefer merge for its versatility** unless you're specifically working with indices in a straightforward manner.
