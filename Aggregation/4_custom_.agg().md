@@ -232,3 +232,79 @@ Year Product EIN SI FI
 **Conclusion**
 
 This code thus allows us to summarize how many members are funded by "SI" and "FI" for each unique combination of Year, Product, and EIN. The function and indexing logic ensures that the sums accurately reflect the different funding types based on the underlying data structure.
+
+SI = ("Members", lambda x: x\[use_pit.loc\[x.index, "Funding"\] == "SI"\].sum())
+
+into smaller steps and understand the order of execution and the purpose of each operation, especially focusing on .loc, x.index, and .sum().
+
+**1\. Initial Context**
+
+We are inside a group aggregation context using pandas' groupby and agg methods. Here's how the flow typically goes:
+
+- The DataFrame (use_pit) is grouped by specified columns (e.g., Year, Product, EIN).
+- For each group formed, a lambda function is defined which will perform operations on the Members column.
+
+**Breakdown of the Lambda Function**
+
+**The Entire Statement**:
+
+lambda x: x\[use_pit.loc\[x.index, "Funding"\] == "SI"\].sum()
+
+**Breaking It Down**:
+
+1. **Input to the Lambda Function**:
+    - x: Represents a **Series** of Members that belong to the current group being processed by the lambda function. The indices of this Series correspond to the **original DataFrame** indices.
+2. **Accessing the Original DataFrame**:
+    - **x.index**:
+        - This retrieves the indices of the current Series x. For example, if the group has members with indices \[0, 1\], x.index will return those indices.
+        - This is crucial because it allows us to refer back to the original DataFrame (use_pit).
+3. **Using .loc**:
+    - **use_pit.loc\[x.index, "Funding"\]**:
+        - The .loc accessor retrieves rows from the use_pit DataFrame at the specified indices (x.index) and selects the "Funding" column.
+        - For example, if x.index is \[0, 1\], this retrieves the Funding values for those indices from use_pit, resulting in:
+        - 0 SI
+        - 1 FI
+        - Name: Funding, dtype: object
+4. **Condition Checking**:
+    - **use_pit.loc\[x.index, "Funding"\] == "SI"**:
+        - This creates a boolean Series where each element indicates whether the corresponding funding in Funding column equals "SI".
+        - For our previous example, it would return:
+        - 0 True
+        - 1 False
+        - Name: Funding, dtype: bool
+5. **Filtering the Members Series**:
+    - **x\[...\]**:
+        - Now, we use the boolean Series to filter the Members Series x.
+        - x\[use_pit.loc\[x.index, "Funding"\] == "SI"\] translates to selecting elements in x corresponding to True values from the boolean Series.
+        - In our case, this would result in:
+        - 0 10 # Only members where Funding is "SI" would remain.
+        - dtype: int64
+6. **Applying .sum()**:
+    - Finally, .sum() is called on the filtered Series.
+    - The purpose of this is to compute the total of the remaining members that were filtered in the previous step.
+    - If the filtered Series is \[10\], x\[...\] returns a Series with a value of 10, and thus:
+    - 10 # This is the result of the .sum() applied to the filtered Series
+
+**Summary of Execution Order**
+
+So, to summarize the order of operations:
+
+1. **Input**: x (a Series of Members for the current group).
+2. **Retrieve Indices**: x.index (get the indices for x).
+3. **Access Funding**:
+    - use_pit.loc\[x.index, "Funding"\] (look up the "Funding" for those indices in the original DataFrame).
+4. **Evaluate Condition**:
+    - Create a boolean mask with the condition == "SI".
+5. **Filter Members**:
+    - x\[...\] uses the boolean mask to filter Members.
+6. **Sum Remaining**:
+    - .sum() computes the total of the filtered values.
+
+**Why Use x.index Specifically**
+
+- **Context Preservation**: The key reason for using x.index is to ensure that you're accessing the right rows in the original DataFrame that correspond to the members within the current group. Since x represents only the members of the current group, using its index retains that link back to the original DataFrame.
+- **Dynamic Reference**: Each of the groups may have different indices based on how the DataFrame has been created and modified prior to this aggregation step. So, dynamically accessing x.index allows for flexibility and correctness in referencing the appropriate rows.
+
+**Conclusion**
+
+Using .sum() at the end allows for collapsing multiple matching members into a single total, which is necessary for aggregation metrics. Removing it would simply return the filtered Series of Members, which is not the intent of an aggregation function where sums are usually requested.
